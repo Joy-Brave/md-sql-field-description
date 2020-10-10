@@ -6,7 +6,7 @@ path = "D:\\project\\md-sql-field-description\\result\\"
 mdFieldDesc=myfunc.MdFieldDesc(path)
 #資料庫相關class
 sqlConn=myfunc.SqlConn(config.db)
-#將result folder中的現有Markdown檔案存取目前的欄位說明
+#存取result folder中的現有Markdown檔案目前的欄位說明
 mdFieldDesc.setFilenameExtList('md').setMdTableDesc()
 #SELECT SQL 的欄位資訊
 sqlConn.selectTable(sqlConn.fieldDescQuery)
