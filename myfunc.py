@@ -144,8 +144,87 @@ class SqlConn():
             The result of setter function : "selectTable".
         
         """
+        print('Result:')
+        print(self._selectResult)
         return self._selectResult
 
+    def insertIntoTable(self, tableName, valueList, columnNameList=None):      
+        with self._conn.cursor() as cursor:
+            s='%s'
+            ss=''
+            for i in range(len(valueList[0])):
+                if i!=0 :ss=ss+', '
+                ss=ss+s
+            sqlStatement='''
+            INSERT INTO {tableName} {columnNameList_str} VALUES ({var})
+            '''.format(tableName=tableName,columnNameList_str='' if columnNameList==None else '('+', '.join(columnNameList)+')',
+            var=ss)
+            print(sqlStatement)
+            failset=[]
+            for value in valueList:
+                try:
+                    cursor.execute(sqlStatement,value)
+                    self._conn.commit()
+                    #print('success: '+str(value))
+                except: 
+                    failset.append('fail: '+str(value))
+            for text in failset:
+                print(text)
+        return self
+
+    def truncateTable(self, tableNameList):
+        with self._conn.cursor() as cursor:
+            sqlStatement='''
+            TRUNCATE TABLE {tableName}
+            '''
+            print(sqlStatement)
+            failset=[]
+            for value in tableNameList:
+                try:
+                    cursor.execute(sqlStatement.format(tableName=value))
+                    self._conn.commit()
+                    #print('success: '+str(value))
+                except: 
+                    failset.append('fail: '+str(value))
+            for text in failset:
+                print(text)
+        return self
+
+    def dropTable(self, tableNameList):
+        with self._conn.cursor() as cursor:
+            sqlStatement='''
+            DROP TABLE {tableName}
+            '''
+            print(sqlStatement)
+            failset=[]
+            for value in tableNameList:
+                try:
+                    cursor.execute(sqlStatement.format(tableName=value))
+                    self._conn.commit()
+                    #print('success: '+str(value))
+                except: 
+                    failset.append('fail: '+str(value))
+            for text in failset:
+                print(text)
+        return self
+
+    def getJsonTable(self,tableName):
+        subSqlConn=SqlConn(self.db)
+        columnName=subSqlConn.selectTable('''
+        SELECT COLUMN_NAME from INFORMATION_SCHEMA.COLUMNS
+        where TABLE_NAME='{0}'
+        and TABLE_SCHEMA='dbo'
+        order by ORDINAL_POSITION'''.format(tableName)).getSelectResult()
+        for i in range(len(columnName)):
+            columnName[i]=columnName[i][0]
+        dataset=[]    
+        for row in subSqlConn.selectTable('select * from {0}'.format(tableName)).getSelectResult():
+            data={}
+            for i in range(len(columnName)):
+                data[columnName[i]]=row[i]
+            dataset.append(data)
+        print(dataset)
+        return dataset
 
 
 class MdFieldDesc():
@@ -204,6 +283,7 @@ class MdFieldDesc():
             The result of setter function : "setFilenameList" or "setFilenameExtList".
         
         """
+        print(self._filenameList)
         return self._filenameList
 
     def setMdTableDesc(self, filenamels=None):
@@ -271,6 +351,7 @@ class MdFieldDesc():
                     ,...
                 }
         """
+        print(self._mdTableDesc)
         return self._mdTableDesc
     
     
